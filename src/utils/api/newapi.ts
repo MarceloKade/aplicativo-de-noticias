@@ -7,7 +7,12 @@ export interface GNewsArticle {
   description: string;
   content: string;
   url: string;
-  image: string; 
+  image: string;
+  publishedAt: string;
+  category: string;
+  source: {
+    name: string;
+  }
 }
 
 export async function fetchNewsByCategory(category: string): Promise<GNewsArticle[]> {
@@ -21,7 +26,9 @@ export async function fetchNewsByCategory(category: string): Promise<GNewsArticl
     });
 
     const articles = response.data.articles.map((article: any) => ({
-      author: article.source.name,
+      source: {
+        name: article.source.name
+      },
       title: article.title,
       description: article.description,
       url: article.url,
