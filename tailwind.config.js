@@ -10,6 +10,9 @@ module.exports = {
       fontFamily: {
         sans: ['var(--font-roboto)', 'sans-serif']
       },
+      screens: {
+        'ss': '375px',
+      },
     },
   },
   plugins: [],
