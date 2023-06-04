@@ -45,7 +45,7 @@ export default function Menu() {
                     ))}
                 </ul>
             </header>
-            <main className="mt-8">
+            <main className="w-full h-full pt-16 bg-blue-800 bg-opacity-30">
                 <ul>
                     <Category category={selectedCategory} />
                 </ul>
