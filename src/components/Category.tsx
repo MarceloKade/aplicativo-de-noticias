@@ -39,16 +39,17 @@ export default function Category({ category }: { category: string }) {
             <ul className="flex justify-center flex-wrap gap-2">
                 {news.map((article, index) => (
                     <li key={index} className="relative">
-                        <h3 className="absolute bottom-0 left-0 right-0 mb-0 text-xl bg-black bg-opacity-50 p-2 z-10">
-                            {article.title}
-                        </h3>
+
                         <div
                             onClick={() => {
                                 setSelectedArticle(article);
                                 setOpen(true);
                             }}
-                            className="w-96 h-80 cursor-pointer overflow-hidden rounded-xl"
+                            className="xl:w-96 md:w-80 ss:w-80 cursor-pointer overflow-hidden rounded-xl"
                         >
+                            <h3 className="absolute bottom-0 left-0 right-0 mb-0 text-xl bg-black bg-opacity-50 p-2 z-10">
+                                {article.title}
+                            </h3>
                             <img
                                 src={article.image}
                                 className="w-full h-full object-cover transform transition-transform hover:scale-110"
