@@ -2,7 +2,7 @@
 
 <br>
 
-<a href="https://aplicativo-de-noticias.netlify.app/" title="Clique aqui para acessar o projeto">
+<a href="https://aplicativo-de-noticias.netlify.app/" title="Clique aqui para acessar o projeto">Clique aqui para acessar o projeto
 <img width="3161" alt="previsao-tempo" src="https://github.com/MarceloKade/aplicativo-de-noticias/assets/98852912/d152c26a-a858-42c9-96d7-b98ca63f9dfd">
 </a>
 
