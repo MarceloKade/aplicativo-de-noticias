@@ -1,78 +1,116 @@
-'use client'
-import { useEffect, useState } from 'react';
-import { fetchNewsByCategory, GNewsArticle } from '../utils/api/newapi';
-import Modal from '../components/Modal';
+"use client";
+
+import { useEffect, useState } from "react";
+import { fetchNewsByCategory, GNewsArticle } from "../utils/api/newapi";
+import Modal from "../components/Modal";
 
 export default function Category({ category }: { category: string }) {
-    const [news, setNews] = useState<GNewsArticle[]>([]);
-    const [open, setOpen] = useState(false);
-    const [selectedArticle, setSelectedArticle] = useState<GNewsArticle | null>(null);
+  const [news, setNews] = useState<GNewsArticle[]>([]);
+  const [selectedArticle, setSelectedArticle] = useState<GNewsArticle | null>(
+    null,
+  );
 
-    useEffect(() => {
-        async function fetchNews() {
-            try {
-                const response = await fetchNewsByCategory(category);
-                const cleanedNews = removeBracketsFromNews(response);
-                setNews(cleanedNews);
-            } catch (error) {
-                console.error(error);
-            }
+  useEffect(() => {
+    let active = true;
+
+    async function loadNews() {
+      try {
+        const response = await fetchNewsByCategory(category);
+
+        const cleanedNews = response.map((article) => ({
+          ...article,
+          content: (article.content ?? "").replace(/\[.*?\]/g, ""),
+        }));
+
+        if (active) {
+          setNews(cleanedNews);
         }
+      } catch (error) {
+        console.error("Erro ao carregar notícias:", error);
 
-        fetchNews();
-    }, [category]);
-
-    function removeBracketsFromNews(news: GNewsArticle[]): GNewsArticle[] {
-        return news.map(article => {
-            const cleanedContent = article.content.replace(/\[.*?\]/g, '');
-            return { ...article, content: cleanedContent };
-        });
+        if (active) {
+          setNews([]);
+        }
+      }
     }
 
-    function handleDate(date: Date): string {
-        const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
-        return new Date(date).toLocaleDateString('pt-BR', options);
+    loadNews();
+
+    return () => {
+      active = false;
+    };
+  }, [category]);
+
+  function handleDate(date: string): string {
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "Data indisponível";
     }
 
-    return (
-        <div>
-            <ul className="flex justify-center flex-wrap gap-2">
-                {news.map((article, index) => (
-                    <li key={index} className="relative">
+    return parsedDate.toLocaleDateString("pt-BR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  }
 
-                        <div
-                            onClick={() => {
-                                setSelectedArticle(article);
-                                setOpen(true);
-                            }}
-                            className="xl:w-96 md:w-80 ss:w-80 cursor-pointer overflow-hidden rounded-xl"
-                        >
-                            <h3 className="absolute bottom-0 left-0 right-0 mb-0 text-xl bg-black bg-opacity-50 p-2 z-10">
-                                {article.title}
-                            </h3>
-                            <img
-                                src={article.image}
-                                className="w-full h-full object-cover transform transition-transform hover:scale-110"
-                                style={{ transitionDuration: '1s' }}
-                                alt={article.title}
-                            />
-                        </div>
+  return (
+    <>
+      {news.length === 0 ? (
+        <p className="py-10 text-center text-gray-200">
+          Nenhuma notícia disponível nesta categoria.
+        </p>
+      ) : (
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+          {news.map((article, index) => (
+            <li key={`${article.url}-${index}`} className="min-w-0">
+              <button
+                type="button"
+                onClick={() => setSelectedArticle(article)}
+                className="group relative block aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-800 text-left shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                aria-label={`Ler notícia: ${article.title}`}
+              >
+                {article.image ? (
+                  <img
+                    src={article.image}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-gray-300">
+                    Imagem indisponível
+                  </div>
+                )}
 
-                    </li>
-                ))}
-            </ul>
-            {selectedArticle && (
-                <Modal
-                    isOpen={open}
-                    setOpen={setOpen}
-                    title={selectedArticle.title}
-                    publishedAt={handleDate(new Date(selectedArticle.publishedAt))}
-                    image={selectedArticle.image}
-                    content={selectedArticle.content}
-                    url={selectedArticle.url}
-                    source={{ name: selectedArticle.source.name }}
-                />
-            )}
-        </div>
-    );
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+
+                <h2 className="absolute inset-x-0 bottom-0 line-clamp-3 p-3 text-base font-semibold leading-snug text-white sm:p-4 sm:text-lg">
+                  {article.title}
+                </h2>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {selectedArticle && (
+        <Modal
+          isOpen={true}
+          setOpen={(isOpen) => {
+            if (!isOpen) {
+              setSelectedArticle(null);
+            }
+          }}
+          title={selectedArticle.title}
+          publishedAt={handleDate(selectedArticle.publishedAt)}
+          image={selectedArticle.image}
+          content={selectedArticle.content ?? ""}
+          url={selectedArticle.url}
+          source={{ name: selectedArticle.source.name }}
+        />
+      )}
+    </>
+  );
 }

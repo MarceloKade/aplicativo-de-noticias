@@ -1,36 +1,108 @@
+"use client";
+
+import { useEffect } from "react";
+
 interface ModalProps {
-    isOpen: boolean;
-    setOpen: (isOpen: boolean) => void;
-    title: string;
-    content: string;
-    publishedAt: string;
-    image: string;
-    url: string;
-    source: {
-        name: string;
-    };
+  isOpen: boolean;
+  setOpen: (isOpen: boolean) => void;
+  title: string;
+  content: string;
+  publishedAt: string;
+  image: string;
+  url: string;
+  source: {
+    name: string;
+  };
 }
 
-export default function Modal({ isOpen, setOpen, title, content, publishedAt, image, source, url }: ModalProps) {
-    if (isOpen) {
-        return (
-            <div className="fixed inset-0 flex items-center justify-center pl-16 ss:pl-6 pr-16 ss:pr-6 z-20">
-                <div className="absolute inset-0 bg-black opacity-60" onClick={() => setOpen(false)}></div>
-                <div className="bg-white p-10 relative text-black rounded-xl max-w-5xl">
-                    <button
-                        className="absolute top-2 right-2 text-4xl pt-0 pr-2 text-gray-500 hover:text-gray-700"
-                        onClick={() => setOpen(!isOpen)}> &times; </button>
-                    <h2 className="text-3xl font-bold mb-4">{title}</h2>
-                    <p className="text-sm text-gray-500 mt-2 xl:mb-20 md:mb-20 ss:mb-10">{publishedAt}</p>
-                    <img className="xl:ml-24 xl:w-96 md:ml-24 md:w-96 ss:ml-10 ss:w-40 h-auto object-cover scale-150" src={image} alt="Imagem da notícia" />
-                    <p className="xl:mt-20 md:mt-20 ss:mt-10 text-base leading-relaxed max-w-2xl">{content}</p>
-                    <a href={url} target="_blank" className="text-blue-500 hover:text-blue-700 font-bold">Saiba mais</a>
+export default function Modal({
+  isOpen,
+  setOpen,
+  title,
+  content,
+  publishedAt,
+  image,
+  source,
+  url,
+}: ModalProps) {
+  useEffect(() => {
+    if (!isOpen) return;
 
-                    <p className="text-xl font-bold mt-2">Fonte: {source.name}</p>
-                </div>
-            </div>
-        );
-    } else {
-        return <></>;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
     }
+
+    window.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [isOpen, setOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="news-modal-title"
+    >
+      <button
+        type="button"
+        className="absolute inset-0 cursor-default bg-black/70"
+        onClick={() => setOpen(false)}
+        aria-label="Fechar janela da notícia"
+      />
+
+      <article className="relative z-10 max-h-[90dvh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white p-4 text-gray-900 shadow-2xl sm:p-6 md:p-8">
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-3xl leading-none text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+          aria-label="Fechar notícia"
+        >
+          &times;
+        </button>
+
+        <h2
+          id="news-modal-title"
+          className="mb-3 pr-10 text-xl font-bold leading-snug sm:text-2xl md:text-3xl"
+        >
+          {title}
+        </h2>
+
+        <p className="mb-5 text-sm text-gray-500">{publishedAt}</p>
+
+        {image && (
+          <img
+            src={image}
+            alt={title}
+            className="mb-5 max-h-[45vh] w-full rounded-lg object-contain"
+          />
+        )}
+
+        <p className="mb-6 whitespace-pre-line text-sm leading-relaxed sm:text-base">
+          {content || "Conteúdo não disponível."}
+        </p>
+
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex rounded-lg bg-blue-700 px-5 py-3 font-semibold text-white transition-colors hover:bg-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+        >
+          Ler notícia completa
+        </a>
+
+        <p className="mt-5 text-sm text-gray-600">
+          Fonte: <span className="font-semibold">{source.name}</span>
+        </p>
+      </article>
+    </div>
+  );
 }

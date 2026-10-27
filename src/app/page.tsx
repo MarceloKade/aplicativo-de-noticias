@@ -2,8 +2,8 @@ import Menu from "@/components/Menu";
 
 export default function Home() {
   return (
-    <div className="flex justify-center h-screen">
+    <main className="min-h-screen w-full">
       <Menu />
-    </div>
+    </main>
   );
 }
