@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-const apiKey = 'd5a9aa2b17b9198c702053ebfc889d35';
+const apiKey = process.env.NEXT_PUBLIC_NEWSDATA_API_KEY;
 
 export interface GNewsArticle {
   title: string;
@@ -12,35 +12,48 @@ export interface GNewsArticle {
   category: string;
   source: {
     name: string;
-  }
+  };
 }
 
-export async function fetchNewsByCategory(category: string): Promise<GNewsArticle[]> {
+export async function fetchNewsByCategory(
+  category: string,
+): Promise<GNewsArticle[]> {
   try {
-    const response = await axios.get('https://gnews.io/api/v4/top-headlines', {
+    const categoryMap: Record<string, string> = {
+      general: "top",
+      nation: "politics",
+    };
+
+    const apiCategory = categoryMap[category] ?? category;
+
+    const response = await axios.get("https://newsdata.io/api/1/latest", {
       params: {
-        country: 'br',
-        category: category,
-        token: apiKey,
+        apikey: apiKey,
+        country: "br",
+        language: "pt",
+        category: apiCategory,
       },
     });
 
-    const articles = response.data.articles.map((article: any) => ({
+    const articles = (response.data.results ?? []).map((article: any) => ({
       source: {
-        name: article.source.name
+        name: article.source_name || "Fonte desconhecida",
       },
-      title: article.title,
-      description: article.description,
-      url: article.url,
-      image: article.image,
-      publishedAt: article.publishedAt,
-      content: article.content,
-      category: category,
+      title: article.title || "",
+      description: article.description || "",
+      url: article.link || "",
+      image: article.image_url || "",
+      publishedAt: article.pubDate || "",
+      content: article.content || article.description || "",
+      category,
     }));
 
     return articles;
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error(
+      "Erro ao buscar notícias:",
+      error.response?.data ?? error.message,
+    );
     return [];
   }
 }
